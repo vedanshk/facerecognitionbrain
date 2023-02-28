@@ -1,23 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
-
+import Particles from "react-tsparticles";
+import { useCallback, useState } from "react";
+import { loadFull } from "tsparticles";
+import Navbar from "./components/Navbar";
+import Logo from "./components/Logo";
+import ImageLinkFrom from "./components/ImageLinkForm";
+import FaceRecognition from "./components/FaceRecognition";
+import { particleOptions } from "./utils/particle";
 function App() {
+  const [url, setUrl] = useState("");
+  const particlesInit = useCallback(async (engine) => {
+    console.log(engine);
+
+    await loadFull(engine);
+  }, []);
+
+  const particlesLoaded = useCallback(async (container) => {
+    await console.log(container);
+  }, []);
+
+  const handleSubmit = (imgUrl) => {
+
+      setUrl(imgUrl);
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className=" flex flex-col w-[100vw] gap-2">
+      <Particles
+        init={particlesInit}
+        loaded={particlesLoaded}
+        options={particleOptions}
+        className="fixed inset-0 -z-10 bg-transparent"
+      >
+        {" "}
+      </Particles>
+      <Navbar />
+      <Logo />
+
+      <ImageLinkFrom onSubmit={handleSubmit} />
+      <FaceRecognition imgUrl={url} />
     </div>
   );
 }
