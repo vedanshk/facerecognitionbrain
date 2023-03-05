@@ -7,12 +7,13 @@ import ImageLinkFrom from "./components/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition";
 import { particleOptions } from "./utils/particle";
 import { detectFace } from "./utils/face-recognition";
+import SignIn from "./components/SignIn";
+import Register from "./components/Register";
 function App() {
   const [url, setUrl] = useState("");
-  const [box , setBox] = useState({})
+  const [box, setBox] = useState({});
+  const [route, setRoute] = useState("signin");
   const particlesInit = useCallback(async (engine) => {
-   
-
     await loadFull(engine);
   }, []);
 
@@ -21,26 +22,24 @@ function App() {
   }, []);
 
   console.log(box);
-  const calculateFaceLocation = (region) =>{
+  const calculateFaceLocation = (region) => {
     const clarifaiFace = region.region_info.bounding_box;
-    const image = document.getElementById('inputimage')
+    const image = document.getElementById("inputimage");
 
     const width = Number(image.width);
     const height = Number(image.height);
-    console.log(width , height);
-    return{
-      leftCol: clarifaiFace.left_col *width,
-      topRow: clarifaiFace.top_row *height,
-      rightCol: width - (clarifaiFace.right_col * width),
-      bottomRow:height - (clarifaiFace.bottom_row *height)
-    }
+    console.log(width, height);
+    return {
+      leftCol: clarifaiFace.left_col * width,
+      topRow: clarifaiFace.top_row * height,
+      rightCol: width - clarifaiFace.right_col * width,
+      bottomRow: height - clarifaiFace.bottom_row * height,
+    };
+  };
 
-
-  }
-
-  const displyBox = (box) =>{
+  const displyBox = (box) => {
     setBox(box);
-  }
+  };
 
   const handleSubmit = (imgUrl) => {
     setUrl(imgUrl);
@@ -55,18 +54,40 @@ function App() {
           console.log("Predicted concepts:");
           output.regions.forEach((region) => {
             const { name, value } = region.data.concepts[0];
-            displyBox(calculateFaceLocation(region))
+            displyBox(calculateFaceLocation(region));
             console.log(region.region_info.bounding_box);
             console.log(`Name: ${name} , value: ${value}`);
           });
-        }
-        else{
-          console.log("Face not detected")
+        } else {
+          console.log("Face not detected");
         }
       });
   };
+
+  const handleRouteChange = (newRoute) => {
+    console.log(newRoute);
+    setRoute(newRoute);
+  };
+
+  let content;
+
+  if (route == "register") {
+    content = <Register onRouteChange={handleRouteChange} />;
+  } else if (route == "signin") {
+    content = <SignIn onRouteChange={handleRouteChange} />;
+  } else if (route === "home") {
+    content = (
+      <>
+        <Navbar onRouteChange={handleRouteChange} />
+        <Logo />
+        <ImageLinkFrom onSubmit={handleSubmit} />
+        <FaceRecognition imgUrl={url} box={box} />)
+      </>
+    );
+  }
+
   return (
-    <div className=" flex flex-col w-[100vw] gap-2">
+    <div className=" flex flex-col w-[100vw]  justify-evenly ">
       <Particles
         init={particlesInit}
         loaded={particlesLoaded}
@@ -75,11 +96,8 @@ function App() {
       >
         {" "}
       </Particles>
-      <Navbar />
-      <Logo />
-
-      <ImageLinkFrom onSubmit={handleSubmit} />
-      <FaceRecognition imgUrl={url} box={box} />
+    
+      {content}
     </div>
   );
 }
